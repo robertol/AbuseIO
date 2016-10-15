@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Database\Migrations\Migration;
 use AbuseIO\Models\Permission;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
 
 class CreatePermissionRoleTable extends Migration
 {
@@ -16,11 +16,19 @@ class CreatePermissionRoleTable extends Migration
         Schema::create(
             'permission_role',
             function (Blueprint $table) {
-
+                // Columns
                 $table->increments('id');
-                $table->integer('permission_id');
-                $table->integer('role_id');
+                $table->integer('permission_id')->unsigned();
+                $table->integer('role_id')->unsigned();
+                $table->timestamps();
+                $table->softDeletes();
 
+                // Indexes
+                $table->index('permission_id');
+                $table->index('role_id');
+
+                // Uniques
+                $table->unique(['permission_id', 'role_id']);
             }
         );
 
@@ -38,6 +46,8 @@ class CreatePermissionRoleTable extends Migration
             $permission_role[] = [
                 'permission_id'             => $permission->id,
                 'role_id'                   => '1',
+                'created_at'                => new DateTime(),
+                'updated_at'                => new DateTime(),
             ];
         }
 

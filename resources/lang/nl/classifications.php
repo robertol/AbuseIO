@@ -13,16 +13,18 @@ return [
      * This page may defer from PSR-2
      *
      */
-
-    100 => [
-        'name' => 'Botnet controller',
-        'description' => "
-            This classification has no information text yet.
-            "
+    'DEFAULT' => [
+        'name'        => 'Generiek bericht',
+        'description' => 'Deze klassificatie heeft nog informatie.',
     ],
 
-    101 => [
-        'name' => 'Botnet infection',
+    'BOTNET_CONTROLLER' => [
+        'name'        => 'Botnet server',
+        'description' => 'Deze klassificatie heeft nog informatie.',
+    ],
+
+    'BOTNET_INFECTION' => [
+        'name'        => 'Botnet infectie',
         'description' => "
              <h2>What is a 'Botnet infection'?</h2>
 
@@ -95,18 +97,16 @@ return [
 
             <a target'_blank' href='https://www.ncsc.nl/binaries/content/documents/ncsc-en/current-topics/factsheets/release-me-from-a-botnet/1/Release%2Bme%2Bfrom%2Ba%2Bbotnet.pdf'>NCSC factsheet - Release me from a botnet</a><br>
 
-            "
+            ",
     ],
 
-    102 => [
-        'name' => 'Compromised server',
-        'description' => "
-            This classification has no information text yet.
-            "
+    'COMPROMISED_SERVER' => [
+        'name'        => 'Gecompromitteerde server',
+        'description' => 'Deze klassificatie heeft nog informatie.',
     ],
 
-    103 => [
-        'name' => 'Compromised website',
+    'COMPROMISED_WEBSITE' => [
+        'name'        => 'Gecompromitteerde website',
         'description' => "
             <h2>What is a 'Compromised website'?</h2>
 
@@ -195,11 +195,11 @@ return [
             <a target'_blank' href='http://www.stopbadware.org/'>stopbadware.org has great information, and their forums have a number of helpful and knowledgeable volunteers who may be able to help.</a><br>
             <a target'_blank' href='http://www.antiphishing.org/'>The site antiphishing.org has recommendations on dealing with hacked sites.</a><br>
 
-            "
+            ",
     ],
 
-    104 => [
-        'name' => 'Distribution website',
+    'DISTRIBUTION_WEBSITE' => [
+        'name'        => 'Distributie website',
         'description' => "
             <h2>What is a 'Distribution Website'?</h2>
 
@@ -229,11 +229,85 @@ return [
             <a target'_blank' href='https://support.google.com/webmasters/topic/4598410?hl=en&ref_topic=4596795'>Google Webmaster tools for infected sites</a><br>
             <a target'_blank' href='http://www.bing.com/webmaster/help/malware-re-evaluation-e6982183'>Bing Reevaluation site</a><br>
 
-            "
+            ",
     ],
 
-    105 => [
-        'name' => 'FREAK Vulnerable Server',
+    'FEEDBACK_LOOP' => [
+        'name'        => 'Feedback Loop (FBL) bericht',
+        'description' => "
+                <h2>What is A Feedback Loop?</h2>
+
+                <p>In general, a feedback loop (FBL) or complaint feedback loop is
+                an inter-organizational form of feedback, by which an Internet service provider (ISP) forwards
+                email complaints originating from their users, back to the senders' organizations. Generally,
+                ISPs expect that these transactions are processed as unsubscribe requests and that the sender
+                researches the nature of the request, to reduce the incidence of such complaints.</p>
+
+                <p>The most common method for ISPs to receive users' complaints is by placing a report spam button
+                on their webmail pages or in their email client. Or, the user may send the email to the ISP
+                Postmaster. In rare cases, these feedback loops may not be based on user reports. For example,
+                they may be based on automated virus detection, or similar mechanisms.</p>
+
+                <p>Some ISPs remove the email address of its customer before returning the message to the sender,
+                for privacy or legal reasons. This means it is important for senders to utilize some method
+                other than an email address within a message, in order to identify the recipient.</p>
+
+                <h2>Why Is A Feedback Loop Important?</h2>
+
+                <p>As of May 2008, there were 12 FBLs in place at several of the world's largest ISPs including
+                AOL, Hotmail and Yahoo. Feedback loops have become an email industry standard. The data
+                returned as part of the feedback loop system is extremely valuable in a couple of ways:</p>
+
+                <p> - The first is for list hygiene: Members who complain through a feedback loop can be
+                unsubscribed, thereby reducing future complaints. Some may call this list-washing, but
+                it's just common sense. Even if someone previously opted in to receive messages, if the
+                user complains, the first thing you should do is cease mailing to that user.</p>
+
+                <p> - The second use of FBLs is to analyze the complaints. There is a wealth of data in who
+                complains and what they complain about. Regardless of whether you believe the complaints are
+                unfounded, if they complained they were dissatisfied. Smart marketers aim to avoid dissatisfied
+                customers or prospective customers.</p>
+
+                <h2>What can i do?</h2>
+
+                <p>Campaigns, subject lines and \"from\" addresses can also be monitored to ensure that campaign
+                elements are working well. You can identify areas that need improvement. If a particular mailing,
+                list, or list segment produces too many complaints, it bears further investigation. Many
+                complaints are caused by a failure to meet expectations. As an example, there may be a high
+                complaint rate among new subscribers. This can be caused by subscribers not getting what
+                they thought they signed up for or by a long delay between sign-up and the first mailing.</p>
+
+                <p>To further complicate matters, most ISPs have complaint rate thresholds above which your
+                messages may be filtered or blocked. Unfortunately, most ISPs don't publish these
+                thresholds, which vary by ISP. Monitoring the FBL data will improve your email practices,
+                while ensuring complaint rates do not exceed Internet Service Provider (ISP) thresholds.</p>
+
+                <h2>But i am not sending these e-mails</h2>
+
+                <p>If you receive a high number of FBL complaints on messages that you did not send yourself
+                you should consider the host being reported on (e.g. the IP) to be comprimised as these e-mails
+                did originate from your system. In these cases your advised to shutdown the mailserver and
+                clean the system and its mailqueues before taking it online again.</p>
+
+                <h2>What Is Questionable About Feedback Loops?</h2>
+
+                <p>The spam button brings some very imprecise functionality. Automatic unsubscribe is an
+                example. For years, end users have been told not to trust email unsubscribe links, to avoid
+                confirming that the message was received and opened. So, many users hit the spam button as
+                a way of unsubscribing. Users have to trust their ISP to not get into agreements with
+                spammers, in the strict sense of the latter term.</p>
+
+                <p>The spam button may also be used in error, as a means of expressing disagreement with the
+                message content, or as a means of expressing antipathy towards the message sender. Using
+                the same button for multiple conditions implies guesswork in interpreting the data.</p>
+
+                <p>The bottom line, however, is that the benefits of FBLs far outweigh the cons and the the
+                receiver of the Feedback loop must descide on its correct action.</p>
+            ",
+    ],
+
+    'FREAK_VULNERABLE_SERVER' => [
+        'name'        => 'FREAK kwetsbare server',
         'description' => "
 
             <h2>What is a 'FREAK Vulnerable Server'?</h2>
@@ -283,11 +357,11 @@ return [
             <a target'_blank' href='https://wiki.mozilla.org/Security/Server_Side_TLS#Recommended_configurations'>Mozilla’s security configuration guide</a><br>
             <a target'_blank' href='https://mozilla.github.io/server-side-tls/ssl-config-generator/'>SSL configuration generator</a><br>
 
-            "
+            ",
     ],
 
-    106 => [
-        'name' => 'Harvesting',
+    'HARVESTING' => [
+        'name'        => 'Harvesting',
         'description' => "
 
             <h2>What is 'Harvesting'?</h2>
@@ -321,18 +395,18 @@ return [
 
             <h2>Getting more information</h2>
 
-            "
+            ",
     ],
 
-    107 => [
-        'name' => 'Notice and Take Down request',
-        'description' => "
+    'NOTICE_AND_TAKEDOWN_REQUEST' => [
+        'name'        => 'Notice and Takedown verzoek',
+        'description' => '
             This classification has no information text yet.
-            "
+            ',
     ],
 
-    108 => [
-        'name' => 'Open Chargen Server',
+    'OPEN_CHARGEN_SERVER' => [
+        'name'        => 'Open Chargen Server',
         'description' => "
             <h2>What is an 'Open Chargen server'?</h2>
 
@@ -384,11 +458,11 @@ return [
             <h2>Getting more information</h2>
 
             <a target'_blank' href='http://dnsamplificationattacks.blogspot.nl/2013/07/source-port-chargen-destination-port.html'>Amplification Attacks Observer</a><br>
-            "
+            ",
     ],
 
-    109 => [
-        'name' => 'Open DNS Resolver',
+    'OPEN_DNS_RESOLVER' => [
+        'name'        => 'Open DNS Resolver',
         'description' => "
             <h2>What is an 'Open DNS Resolver'?</h2>
 
@@ -506,11 +580,74 @@ return [
             <a target'_blank' href='http://www.secureworks.com/research/threats/dns-amplification/?threat=dns-amplification'>http://www.secureworks.com/research/threats/dns-amplification/?threat=dns-amplification</a><br>
             <a target'_blank' href='http://www.icann.org/en/groups/ssac/documents/sac-065-en.pdf'>http://www.icann.org/en/groups/ssac/documents/sac-065-en.pdf</a><br>
 
-            "
+            ",
     ],
 
-    110 => [
-        'name' => 'Open IPMI Server',
+    'OPEN_MDNS_SERVICE' => [
+        'name'        => 'Open mDNS Service',
+        'description' => "
+            <h2>What is an 'Open mDNS Service'?</h2>
+
+            <p>An Open mDNS Service is a mDNS server which is willing to resolve
+            recursive DNS queries for anyone on the Internet.</p>
+
+            <p>When a DNS server resolves a recursive DNS query, it tracks down
+            information about a domain name hosted on some other DNS server
+            somewhere else on the Internet (a recursive process involving
+            several other DNS servers in the DNS hierarchy).</p>
+
+            <h2>Why would this be bad?</h2>
+
+            <p>Running an open (UDP) service is not bad on its own and it is mostly
+            a required dependancy when installing a system.
+            Unfortunately, hackers have also found this feature useful in performing a
+            special type of DDoS attack called a 'Amplification Attack'.</p>
+
+            <p>The attacker sends a packet apparently from the intended victim to some
+            server on the Internet that will reply immediately. Because the source
+            IP address is forged, the remote Internet server replies and sends data
+            to the victim.</p>
+
+            <p>That has two effects: the actual source of the attack is hidden and is
+            very hard to trace, and, if many Internet servers are used, an attack
+            can consist of an overwhelming number of packets hitting a victim from
+            all over the world.</p>
+
+            <p>But what makes reflection attacks really powerful is when they are
+            also amplified: when a small forged packet elicits a large reply from
+            the server (or servers). In that case, an attacker can send a small
+            packet from a forged source IP address and have the server (or
+            servers) send large replies to the victim.</p>
+
+            <p>Amplification attacks like that result in an attacker turning a small
+            amount of bandwidth coming from a small number of machines into a massive
+            traffic load hitting a victim from around the Internet.</p>
+
+            <h2>Recommended action</h2>
+
+            <p>In most cases the computer has installed a DNS service as an dependancy
+            as resolving is needed on that computer. However its only required to do
+            local resolving, thus the added 'external access' to this service is
+            unneeded. In such cases we recommend either changing the configuration
+            of your DNS service or to firewall port 5353 for external hosts.</p>
+
+            <p>If you are running a DNS resolver for multiple computers, then consider
+            to limit access to the required group of computer or implement safegaurds
+            like 'Response Rate Limiting'(DNS-RRL) to prevent a DNS Amplification Attack.</p>
+
+            <h2>Tips to resolve this matter</h2>
+
+            <h3>Firewalling the DNS Service</h3>
+
+            <p>To block incoming remote requests you will need to filter UDP/port 5353. You
+            service might also be listening on TCP/port 5353, however only UDP services
+            are used in DNS Amplification Attacks. </p>
+
+            ",
+    ],
+
+    'OPEN_IMPI_SERVER' => [
+        'name'        => 'Open IPMI Server',
         'description' => "
             <h2>What is an 'Open IPMI Server'?</h2>
 
@@ -552,11 +689,11 @@ return [
             <a target'_blank' href='http://fish2.com/ipmi/'>Dan Farmer on IPMI security issues</a><br>
             <a target'_blank' href='https://www.us-cert.gov/ncas/alerts/TA13-207A'>US-CERT alert TA13-207A</a><br>
 
-            "
+            ",
     ],
 
-    111 => [
-        'name' => 'Open MemCached Server',
+    'OPEN_MEMCACHED_SERVER' => [
+        'name'        => 'Open Memcached Server',
         'description' => "
             <h2>What is an 'Open Memcached Server'?</h2>
 
@@ -648,11 +785,11 @@ return [
 
             <atarget'_blank'  href='http://blog.codesherpas.com/on_the_path/2010/08/securing-memcache-in-2-minutes.html'>David Bock - Securing Memcache in 2 Minutes</a><br>
 
-            "
+            ",
     ],
 
-    112 => [
-        'name' => 'Open Microsoft SQL Server',
+    'OPEN_MSSQL_SERVER' => [
+        'name'        => 'Open Microsoft SQL Server',
         'description' => "
             <h2>What is an 'Open Microsoft SQL Server'?</h2>
 
@@ -698,11 +835,11 @@ return [
 
             <a target'_blank' href='https://msdn.microsoft.com/en-us/library/ms175043.aspx'>Configure a Windows Firewall for Database Engine Access</a><br>
 
-            "
+            ",
     ],
 
-    113 => [
-        'name' => 'Open MongoDB Server',
+    'OPEN_MONGODB_SERVER' => [
+        'name'        => 'Open MongoDB Server',
         'description' => "
             <h2>What is an 'Open MongoDB Server'?</h2>
 
@@ -763,11 +900,11 @@ return [
 
             <a target'_blank' href='http://cispa.saarland/wp-content/uploads/2015/02/MongoDB_documentation.pdf'>MongoDB databases at risk</a><br>
 
-            "
+            ",
     ],
 
-    114 => [
-        'name' => 'Open NAT_PMP Server',
+    'OPEN_NATPMP_SERVER' => [
+        'name'        => 'Open NAT_PMP Server',
         'description' => "
             <h2>What is an 'Open NAT-PMP Server'?</h2>
 
@@ -816,11 +953,11 @@ return [
             <a target'_blank' href='http://www.kb.cert.org/vuls/id/184540'>Incorrect implementation of NAT-PMP in multiple devices</a><br>
             <a target'_blank' href='https://community.rapid7.com/community/metasploit/blog/2014/10/21/r7-2014-17-nat-pmp-implementation-and-configuration-vulnerabilities'>NAT-PMP Implementation and Configuration Vulnerabilities</a>
 
-            "
+            ",
     ],
 
-    115 => [
-        'name' => 'Open NTP Server',
+    'OPEN_NTP_SERVER' => [
+        'name'        => 'Open NTP Server',
         'description' => "
             <h2>What is an 'Open NTP Server'?</h2>
 
@@ -913,11 +1050,11 @@ return [
             <a target'_blank' href='http://www.team-cymru.org/secure-ntp-template.html'>Examples in securing a NTP service</a>
             <a target'_blank' href='http://www.internetsociety.org/sites/default/files/01_5.pdf'>Amplification Hell: Revisiting Network Protocols for DDoS Abuse</a>
 
-            "
+            ",
     ],
 
-    116 => [
-        'name' => 'Open Netbios Server',
+    'OPEN_NETBIOS_SERVER' => [
+        'name'        => 'Open Netbios Server',
         'description' => "
             <h2>What is an 'Open Netbios server'?</h2>
 
@@ -995,11 +1132,11 @@ return [
 
             <a target'_blank' href='https://technet.microsoft.com/en-us/library/cc940063.aspx'>Microsoft NetBIOS Over TCP/IP guide</a>
 
-            "
+            ",
     ],
 
-    117 => [
-        'name' => 'Open QOTD Server',
+    'OPEN_QOTD_SERVER' => [
+        'name'        => 'Open QOTD Server',
         'description' => "
             <h2>What is an 'Open QOTD Server'?</h2>
 
@@ -1069,11 +1206,11 @@ return [
             net start simptcp
             </pre>
 
-            "
+            ",
     ],
 
-    118 => [
-        'name' => 'Open REDIS Server',
+    'OPEN_REDIS_SERVER' => [
+        'name'        => 'Open REDIS Server',
         'description' => "
             <h2>What is an 'Open REDIS Server'?</h2>
 
@@ -1157,11 +1294,11 @@ return [
 
             <a target'_blank' href='http://redis.io/topics/security'>Redis Security advisory</a><br>
 
-            "
+            ",
     ],
 
-    119 => [
-        'name' => 'Open SNMP Server',
+    'OPEN_SNMP_SERVER' => [
+        'name'        => 'Open SNMP Server',
         'description' => "
             <h2>What is an 'Open SNMP Server'?</h2>
 
@@ -1266,11 +1403,11 @@ return [
 
             <h2>Getting more information</h2>
 
-            "
+            ",
     ],
 
-    120 => [
-        'name' => 'Open SSDP Server',
+    'OPEN_SSDP_SERVER' => [
+        'name'        => 'Open SSDP Server',
         'description' => "
             <h2>What is an 'Open SSDP Server'?</h2>
 
@@ -1316,11 +1453,39 @@ return [
             interface. You should either stop te service or make sure it is not reachable
             from the internet by using RFC1918 spaces or a firewall.</p>
 
-            "
+            ",
     ],
 
-    121 => [
-        'name' => 'Phishing website',
+    'OPEN_TFTP_SERVER' => [
+        'name'          => 'Open TFTP Server',
+        'description'   => "
+            <h2>Wat is een 'Open TFTP Server'?</h2>
+
+            <p>Trivial File Transfer Protocol, afgekort TFTP, is een eenvoudig
+            bestandsoverdracht protocol dat veel gebruikt wordt om computers vanaf
+            een netwerk te starten. Als de TCP/IP stack reeds draait kan TFTP ook
+            gebruikt worden om andere apparatuur zoals routers, switches, ADSL- en
+            kabelmodems van firmware en configuraties te voorzien. TFTP werd voor
+            het eerst gedefinieerd in 1980.</p>
+
+            <h2>Waarom is dit slecht?</h2>
+
+            <p>TFTP heeft geen enkele vorm van authentication of encryptie. Dit maakt
+            het erg eenvoudig voor iemand om al je configuratie bestanden te downloaden
+            of een corrupte firmware te uploaden!</p>
+
+            <h2>Advies</h2>
+
+            <p>Er is geen reden om deze dienst op een publieke interface aan te bieden.
+            Het advies is om deze dienst te stoppen of ervoor te zorgen dat het niet
+            mogelijk is deze dienst via het internet te bereiken is. Dit kan door gebruik
+            te maken van RFC1918 ip reeksen of een firewall.</p>
+
+            ",
+    ],
+
+    'PHISING_WEBSITE' => [
+        'name'        => 'Phishing Website',
         'description' => "
             <h2>What is a 'Phishing website'?</h2>
 
@@ -1387,11 +1552,11 @@ return [
             <a target'_blank' href='http://www.stopbadware.org/'>stopbadware.org has great information, and their forums have a number of helpful and knowledgeable volunteers who may be able to help.</a><br>
             <a target'_blank' href='http://www.antiphishing.org/'>The site antiphishing.org has recommendations on dealing with hacked sites.</a><br>
 
-            "
+            ",
     ],
 
-    124 => [
-        'name' => 'RBL Listed',
+    'RBL_LISTED' => [
+        'name'        => 'RBL Notatie',
         'description' => "
             <h2>What does 'RBL Listed' mean?</h2>
 
@@ -1436,11 +1601,11 @@ return [
 
             <a target'_blank' href='http://www.anti-abuse.org/multi-rbl-check'>Anti-abuse multi-rbl-check</a><br>
 
-            "
+            ",
     ],
 
-    125 => [
-        'name' => 'SPAM',
+    'SPAM' => [
+        'name'        => 'Spam',
         'description' => "
             <h2>What is 'Spam'?</h2>
 
@@ -1484,11 +1649,11 @@ return [
             <p>If you are unable to or unsure how to resolve this issue,
             please contact our abuse department for support.</p>
 
-            "
+            ",
     ],
 
-    126 => [
-        'name' => 'SPAM Trap',
+    'SPAMTRAP' => [
+        'name'        => 'Spamval',
         'description' => "
             <h2>What is a SPAM Trap?</h2>
 
@@ -1533,11 +1698,11 @@ return [
             <a target'_blank' href='http://blog.returnpath.com/blog/jamie-lawler/trap-tips-avoiding-and-removing-spam-traps'>Tips to avoid SpamTraps</a><br>
             <a target'_blank' href='http://www.activecampaign.com/help/bounces-soft-bounce-vs-hard-bounce/'>Hard/Soft Bounce configuration</a><br>
 
-            "
+            ",
     ],
 
-    127 => [
-        'name' => 'SSLv3 Vulnerable Server',
+    'SSLV3_VULNERABLE_SERVER' => [
+        'name'        => 'SSLv3 kwetsbare server',
         'description' => "
             <h2>What is a 'SSLv3 Vulnerable Server'?</h2>
 
@@ -1617,11 +1782,11 @@ return [
             <a target'_blank' href='http://disablesslv3.com/'>Disable SSLv3 - a community-powered step-by-step tutorial</a><br>
             <a target'_blank' href='https://www.poodletest.com/'>SSLv3 / POODLE Test</a><br>
 
-            "
+            ",
     ],
 
-    128 => [
-        'name' => 'Spamvertised web site',
+    'SPAMVERTISED_WEBSITE' => [
+        'name'        => 'Spamvertised website',
         'description' => "
             <h2>What is a 'Spamvertised web site'?</h2>
 
@@ -1650,11 +1815,11 @@ return [
             <a target'_blank' href='https://wordpress.org/plugins/sucuri-scanner/'>WordPress Security scanner (Sucuri)</a><br>
             <a target'_blank' href='http://spamvertised.abusebutler.com/'>List of Spamvertised websites</a><br>
 
-            "
+            ",
     ],
 
-    129 => [
-        'name' => 'Open ElasticSearch Server',
+    'OPEN_ELASTICSEARCH_SERVER' => [
+        'name'        => 'Open ElasticSearch Server',
         'description' => "
             <h2>What is an 'Open ElasticSearch Server'?</h2>
 
@@ -1686,34 +1851,34 @@ return [
             <h2>Getting more information</h2>
 
             <a href='http://bouk.co/blog/elasticsearch-rce/'>Insecure default in Elasticsearch enables remote code execution</a><br>
-            "
+            ",
     ],
 
-    130 => [
-        'name' => 'Copyright Infringement',
-        'description' => "
+    'COPYRIGHT_INFRINGEMENT' => [
+        'name'        => 'Copyright schending',
+        'description' => '
             This classification has no information text yet.
-            "
+            ',
     ],
 
-    131 => [
-        'name' => 'Possible DDoS sending Server',
-        'description' => "
+    'POSSIBLE_DDOS_SENDING_SERVER' => [
+        'name'        => 'Mogelijke DDoS Server',
+        'description' => '
             This classification has no information text yet.
-            "
+            ',
     ],
 
-    132 => [
-        'name' => 'DDoS sending Server',
-        'description' => "
+    'DDOS_SENDING_SERVER' => [
+        'name'        => 'DDoS Server',
+        'description' => '
             This classification has no information text yet.
-            "
+            ',
     ],
 
-    133 => [
-        'name' => 'Open Portmapper server',
+    'OPEN_PORTMAP_SERVER' => [
+        'name'        => 'Open Portmapper Server',
         'description' => "
-            <h2>What is an 'Open Portmapper server'?</h2>
+            <h2>What is an 'Open Portmapper Server'?</h2>
 
             <p>The port mapper (rpc.portmap or rpcbind) is a remote procedure call (RPC) service
             running on TCP or UDP port 111 that runs on servers to provide information about
@@ -1752,55 +1917,55 @@ return [
             <p>We recommend you to only allow RPC calls from trusted sources. This
             can be achieved by dropping all traffic for RPC services on your local
             firewall and only allowing connections from trusted IP addresses.
-            "
+            ",
     ],
 
-    134 => [
-        'name' => 'Malware infection',
-        'description' => "
+    'MALWARE_INFECTION' => [
+        'name'        => 'Malware infectie',
+        'description' => '
             This classification has no information text yet.
-            "
+            ',
     ],
 
-    135 => [
-        'name' => 'Comment Spam',
-        'description' => "
+    'COMMENT_SPAM' => [
+        'name'        => 'Commentaar Spam',
+        'description' => '
             This classification has no information text yet.
-            "
+            ',
     ],
 
-    136 => [
-        'name' => 'Hack attack',
-        'description' => "
+    'HACK_ATTACK' => [
+        'name'        => 'Hack aanval',
+        'description' => '
             This classification has no information text yet.
-            "
+            ',
     ],
 
-    137 => [
-        'name' => 'Informational',
-        'description' => "
+    'INFORMATIONAL' => [
+        'name'        => 'Informationeel',
+        'description' => '
             This classification has no information text yet.
-            "
+            ',
     ],
 
-    138 => [
-        'name' => 'Login attack',
-        'description' => "
+    'LOGIN_ATTACK' => [
+        'name'        => 'Login aanval',
+        'description' => '
             This classification has no information text yet.
-            "
+            ',
     ],
 
-    139 => [
-        'name' => 'Dictionary attack',
-        'description' => "
+    'DICTIONARY_ATTACK' => [
+        'name'        => 'Woordenboek aanval',
+        'description' => '
             This classification has no information text yet.
-            "
+            ',
     ],
 
-    140 => [
-        'name' => 'Rule Breaker',
-        'description' => "
+    'RULE_BREAKER' => [
+        'name'        => 'Regel breker',
+        'description' => '
             This classification has no information text yet.
-            "
+            ',
     ],
 ];

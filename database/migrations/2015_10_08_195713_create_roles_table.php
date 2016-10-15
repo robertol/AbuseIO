@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
 
 class CreateRolesTable extends Migration
 {
@@ -15,11 +15,12 @@ class CreateRolesTable extends Migration
         Schema::create(
             'roles',
             function (Blueprint $table) {
-
+                // Columns
                 $table->increments('id');
-                $table->string('role_title');
-                $table->string('role_slug');
-
+                $table->string('name', 80);
+                $table->string('description');
+                $table->timestamps();
+                $table->softDeletes();
             }
         );
 
@@ -28,27 +29,17 @@ class CreateRolesTable extends Migration
 
     public function addDefaultRoles()
     {
-
         DB::table('roles')->where('id', '=', '1')->delete();
         $roles = [
             [
-                'id'                        => 1,
-                'role_title'                => 'System Administrator',
-                'role_slug'                 => 'admin',
-            ],
-            [
-                'id'                        => 2,
-                'role_title'                => 'Abusedesk User',
-                'role_slug'                 => 'abusedesk',
-            ],
-            [
-                'id'                        => 3,
-                'role_title'                => 'Servicedesk User',
-                'role_slug'                 => 'servicedesk',
+                'id'            => 1,
+                'name'          => 'Admin',
+                'description'   => 'System Administrator',
+                'created_at'    => new DateTime(),
+                'updated_at'    => new DateTime(),
             ],
         ];
         DB::table('roles')->insert($roles);
-
     }
 
     /**

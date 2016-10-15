@@ -1,11 +1,10 @@
 <?php
 
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
 
 class CreateDomainsTable extends Migration
 {
-
     /**
      * Run the migrations.
      *
@@ -16,13 +15,15 @@ class CreateDomainsTable extends Migration
         Schema::create(
             'domains',
             function (Blueprint $table) {
-
+                // Columns
                 $table->increments('id');
-                $table->string('name');
+                $table->string('name')->unique();
                 $table->integer('contact_id')->unsigned();
                 $table->boolean('enabled')->unsigned();
                 $table->timestamps();
+                $table->softDeletes();
 
+                // Indexes
                 $table->index('name');
                 $table->index('contact_id');
             }

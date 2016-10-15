@@ -4,7 +4,6 @@ use Illuminate\Database\Seeder;
 
 class NotesTableSeeder extends Seeder
 {
-
     public function run()
     {
         DB::table('notes')->delete();
@@ -17,8 +16,8 @@ class NotesTableSeeder extends Seeder
                 'text'                      => 'Warned client that we will terminate service until resolved',
                 'hidden'                    => false,
                 'viewed'                    => false,
-                'created_at'                => new DateTime,
-                'updated_at'                => new DateTime
+                'created_at'                => new DateTime(),
+                'updated_at'                => new DateTime(),
             ],
             [
                 'id'                        => '2',
@@ -27,18 +26,18 @@ class NotesTableSeeder extends Seeder
                 'text'                      => 'Oh please dont shut my internet off!',
                 'hidden'                    => false,
                 'viewed'                    => false,
-                'created_at'                => new DateTime,
-                'updated_at'                => new DateTime
+                'created_at'                => new DateTime(),
+                'updated_at'                => new DateTime(),
             ],
             [
                 'id'                        => '3',
                 'ticket_id'                 => '1',
-                'submitter'                 => 'IP Contact',
+                'submitter'                 => 'Abusedesk',
                 'text'                      => 'Well too bad!',
                 'hidden'                    => true,
                 'viewed'                    => false,
-                'created_at'                => new DateTime,
-                'updated_at'                => new DateTime
+                'created_at'                => new DateTime(),
+                'updated_at'                => new DateTime(),
             ],
             [
                 'id'                        => '4',
@@ -47,29 +46,29 @@ class NotesTableSeeder extends Seeder
                 'text'                      => 'Hoster ... Please fix the problem ...',
                 'hidden'                    => false,
                 'viewed'                    => false,
-                'created_at'                => new DateTime,
-                'updated_at'                => new DateTime
+                'created_at'                => new DateTime(),
+                'updated_at'                => new DateTime(),
             ],
             [
                 'id'                        => '5',
                 'ticket_id'                 => '2',
-                'submitter'                 => 'Abusedesk (John Smith)',
+                'submitter'                 => 'Abusedesk (Default Admin)',
                 'text'                      => 'Placed in quarantine until client is contacted',
                 'hidden'                    => true,
                 'viewed'                    => false,
-                'created_at'                => new DateTime,
-                'updated_at'                => new DateTime
+                'created_at'                => new DateTime(),
+                'updated_at'                => new DateTime(),
             ],
             [
                 'id'                        => '6',
                 'ticket_id'                 => '2',
-                'submitter'                 => 'IP Contant',
+                'submitter'                 => 'IP Contact',
                 'text'                      => 'Antivirus has removed malware',
                 'hidden'                    => false,
                 'viewed'                    => false,
-                'created_at'                => new DateTime,
-                'updated_at'                => new DateTime
-            ]
+                'created_at'                => new DateTime(),
+                'updated_at'                => new DateTime(),
+            ],
         ];
 
         DB::table('notes')->insert($notes);

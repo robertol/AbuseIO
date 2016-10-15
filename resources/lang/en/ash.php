@@ -1,21 +1,15 @@
 <?php
 
+/**
+ * Translations for AbuseIO Self Help (ash).
+ */
 return [
-
-    /*
-    |--------------------------------------------------------------------------
-    | ASH Language Lines
-    |--------------------------------------------------------------------------
-    |
-    | The following language lines are used by the ASH views
-    | This excludes the general field mapping of names (like data from info blobs)
-    */
-
-    'title'                         => 'ASH - Ticket',
+    'title'                         => 'AbuseIO Self-help',
     'intro'                         => 'You are seeing this page because we have detected suspicious activities'.
                                        ' from your IP address, Domain name or E-Mail address. On this page you'.
                                        ' will find all the information about these activities and the underlying'.
                                        ' problem.',
+    'ticket'                        => ' Ticket',
 
     'menu' => [
         'basic'                     => 'Basic Information',
@@ -25,9 +19,11 @@ return [
     ],
 
     'basic' => [
-        'ip'                        => 'IP address',
+        'ip'                        => 'IP',
+        'ipAddress'                 => 'IP address',
         'ptr'                       => 'Reverse DNS',
-        'domain'                    => 'Domain name',
+        'domain'                    => 'Domain',
+        'domainName'                => 'Domain name',
         'class'                     => 'Classification',
         'type'                      => 'Type',
         'firstSeen'                 => 'First seen',
@@ -51,18 +47,25 @@ return [
         'header'                    => 'You can use the form below to reply to this ticket.',
         'noMessages'                => 'No interaction has been done yet.',
         'placeholder'               => 'Use this text box to ask your question or your applied solution.',
-        'placeholder_admin'         => 'Enter a reply to the customer',
+        'placeholder_admin'         => 'Enter a reply to the contact',
         'previousCommunication'     => 'Previous communication',
         'responseFrom'              => 'Response from',
-        'contact'                   => 'Customer',
+        'contact'                   => 'Contact',
         'abusedesk'                 => 'Abusedesk',
         'submit'                    => 'Submit',
         'reply'                     => 'Reply',
         'download'                  => 'Download',
         'view'                      => 'View',
+        'closed'                    => 'You can not add notes to this ticket because it was closed or notes have been disabled',
+        'unchanged'                 => 'Do not change the ticket status',
+        'open'                      => 'Leave ticket status open',
+        'resolved'                  => 'I have resolved the issue',
+        'ignored'                   => 'This issue can be ignored',
     ],
 
     'messages' => [
         'alertTest'                 => 'This is an alert message',
+        'noteAdded'                 => 'Note has been added.',
+        'noteEmpty'                 => 'You cannot add an empty message!',
     ],
 ];

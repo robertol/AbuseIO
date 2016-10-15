@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
 
 class CreatePermissionsTable extends Migration
 {
@@ -15,12 +15,12 @@ class CreatePermissionsTable extends Migration
         Schema::create(
             'permissions',
             function (Blueprint $table) {
-
+                // Columns
                 $table->increments('id');
-                $table->string('permission_title');
-                $table->string('permission_slug');
-                $table->string('permission_description')->nullable();
-
+                $table->string('name', 80);
+                $table->string('description')->nullable();
+                $table->timestamps();
+                $table->softDeletes();
             }
         );
 
@@ -39,9 +39,22 @@ class CreatePermissionsTable extends Migration
         // Add single permissions
         $permissions = [
             [
-                'permission_title'          => 'login admin',
-                'permission_slug'           => 'admin_login',
-                'permission_description'    => 'Login to admin portal',
+                'name'                      => 'login_portal',
+                'description'               => 'Login to portal',
+                'created_at'                => new DateTime(),
+                'updated_at'                => new DateTime(),
+            ],
+            [
+                'name'                      => 'login_api',
+                'description'               => 'Login to api',
+                'created_at'                => new DateTime(),
+                'updated_at'                => new DateTime(),
+            ],
+            [
+                'name'                      => 'profile_manage',
+                'description'               => 'Manage own profile',
+                'created_at'                => new DateTime(),
+                'updated_at'                => new DateTime(),
             ],
         ];
 
@@ -51,13 +64,14 @@ class CreatePermissionsTable extends Migration
             'netblocks',
             'domains',
             'tickets',
+            'notes',
             'search',
             'analytics',
             'accounts',
             'users',
             'brands',
             'templates',
-            'profile',
+            'evidence',
         ];
         $actions = [
             'view',
@@ -70,16 +84,28 @@ class CreatePermissionsTable extends Migration
         foreach ($controllers as $controller) {
             foreach ($actions as $action) {
                 $permissions[] = [
-                    'permission_title'          => "{$action} {$controller}",
-                    'permission_slug'           => "admin_{$controller}_{$action}",
-                    'permission_description'    => "Allow to {$action} {$controller}",
+                    'name'                      => "{$controller}_{$action}",
+                    'description'               => "Allow to {$action} {$controller}",
+                    'created_at'                => new DateTime(),
+                    'updated_at'                => new DateTime(),
+                ];
+            }
+        }
+
+        // disable / enable for accounts and users
+        foreach (['accounts', 'users'] as $controller) {
+            foreach (['disable', 'enable'] as $action) {
+                $permissions[] = [
+                    'name'                      => "{$controller}_{$action}",
+                    'description'               => "Allow to {$action} {$controller}",
+                    'created_at'                => new DateTime(),
+                    'updated_at'                => new DateTime(),
                 ];
             }
         }
 
         // Write permissions into database
         DB::table('permissions')->insert($permissions);
-
     }
 
     /**

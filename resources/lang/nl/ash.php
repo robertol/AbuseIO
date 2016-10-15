@@ -1,21 +1,14 @@
 <?php
 
+/**
+ * Translations for AbuseIO Self Help (ash).
+ */
 return [
-
-    /*
-    |--------------------------------------------------------------------------
-    | ASH Language Lines
-    |--------------------------------------------------------------------------
-    |
-    | The following language lines are used by the ASH views
-    | This excludes the general field mapping of names (like data from info blobs)
-    */
-
-    'title'                         => 'ASH - Ticket',
-    'intro'                         => 'You are seeing this page because we have detected suspicious activities'.
-                                       ' from your IP address, Domain name or E-Mail address. On this page you'.
-                                       ' will find all the information about these activities and the underlying'.
-                                       ' problem.',
+    'title'                         => 'AbuseIO Zelfhulp',
+    'intro'                         => 'Je krijgt deze pagina te zien omdat we verdachte activiteiten hebben'.
+                                       ' waargenomen vanaf jouw IP adres, domeinnaam of e-mail adres. Op deze'.
+                                       ' pagina vind je alle informatie over deze activiteiten en het probleem.',
+    'ticket'                        => ' Ticket',
 
     'menu' => [
         'basic'                     => 'Basis informatie',
@@ -25,9 +18,11 @@ return [
     ],
 
     'basic' => [
-        'ip'                        => 'IP adres',
+        'ip'                        => 'IP',
+        'ipAddress'                 => 'IP adres',
         'ptr'                       => 'Reverse DNS',
-        'domain'                    => 'Domein naam',
+        'domain'                    => 'Domein',
+        'domainName'                => 'Domein naam',
         'class'                     => 'Klassificatie',
         'type'                      => 'Type',
         'firstSeen'                 => 'Eerst gezien',
@@ -54,15 +49,22 @@ return [
         'placeholder_admin'         => 'Reactie richting klant',
         'previousCommunication'     => 'Voorgaande communicatie',
         'responseFrom'              => 'Reactie van',
-        'contact'                   => 'Klant',
+        'contact'                   => 'Contact',
         'abusedesk'                 => 'Abusedesk',
         'submit'                    => 'Opslaan',
         'reply'                     => 'Reactie',
         'download'                  => 'Download',
         'view'                      => 'Bekijk',
+        'closed'                    => 'Het is niet mogelijk om een reactie te geven op dit ticket, omdat het ticket gesloten is of de reacties zijn uitgeschakeld.',
+        'unchanged'                 => 'Ticket status niet veranderen',
+        'open'                      => 'Ticket status open laten',
+        'resolved'                  => 'Ik heb het probleem opgelost',
+        'ignored'                   => 'Dit probleem kan worden genegeerd',
     ],
 
     'messages' => [
         'alertTest'                 => 'Dit is een alert bericht!',
+        'noteAdded'                 => 'Het bericht is toegevoegd aan het ticket',
+        'noteEmpty'                 => 'U kunt geen lege berichten toevoegen!',
     ],
 ];

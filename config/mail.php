@@ -54,7 +54,10 @@ return [
     |
     */
 
-    'from' => ['address' => null, 'name' => null],
+    'from' => [
+        'address' => env('MAIL_FROM_ADDRESS', 'root@localhost.net'),
+        'name'    => env('MAIL_FROM_NAME', 'AbuseIO Password Reset'),
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -120,5 +123,22 @@ return [
     */
 
     'pretend' => false,
+
+    /*
+    |--------------------------------------------------------------------------
+    | S/MIME Signing options
+    |--------------------------------------------------------------------------
+    |
+    | When this option is enabled, e-mail can be signed with the selected
+    | PEM key and certificate placed in ./config/smime/ dir. Please make sure
+    | That your certificate matches the sender/signer in the main config section
+    | under main.notifications.from_address
+    |
+    */
+    'smime' => [
+        'enabled'       => false,
+        'key'           => '/opt/abuseio/config/smikme/key.pem',
+        'certificate'   => '/opt/abuseio/config/smikme/certificate.pem',
+    ],
 
 ];

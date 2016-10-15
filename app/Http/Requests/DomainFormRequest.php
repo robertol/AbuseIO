@@ -2,12 +2,16 @@
 
 namespace AbuseIO\Http\Requests;
 
-use AbuseIO\Http\Requests\Request;
+use AbuseIO\Models\Domain;
 
+/**
+ * Class DomainFormRequest.
+ */
 class DomainFormRequest extends Request
 {
     /**
      * Determine if the user is authorized to make this request.
+     *
      * @return bool
      */
     public function authorize()
@@ -17,13 +21,26 @@ class DomainFormRequest extends Request
 
     /**
      * Get the validation rules that apply to the request.
+     *
      * @return array
      */
     public function rules()
     {
-        return [
-            'name'       => 'required',
-            'contact_id' => 'required|integer'
-        ];
+        switch ($this->method) {
+            case 'GET':
+                break;
+            case 'DELETE':
+                break;
+            case 'POST':
+                return Domain::createRules();
+            case 'PUT':
+                break;
+            case 'PATCH':
+                return Domain::updateRules($this);
+            default:
+                break;
+        }
+
+        return [];
     }
 }

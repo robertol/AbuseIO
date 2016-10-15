@@ -1,24 +1,30 @@
-<?php namespace AbuseIO\Providers;
+<?php
+
+namespace AbuseIO\Providers;
 
 use Illuminate\Bus\Dispatcher;
 use Illuminate\Support\ServiceProvider;
 
+/**
+ * Class BusServiceProvider.
+ */
 class BusServiceProvider extends ServiceProvider
 {
-
     /**
      * Bootstrap any application services.
      *
-     * @param  \Illuminate\Bus\Dispatcher  $dispatcher
+     * @param \Illuminate\Bus\Dispatcher $dispatcher
+     *
      * @return void
      */
     public function boot(Dispatcher $dispatcher)
     {
         $dispatcher->mapUsing(
-            function($command)
-            {
+            function ($command) {
                 return Dispatcher::simpleMapping(
-                    $command, 'AbuseIO\Commands', 'AbuseIO\Handlers\Commands'
+                    $command,
+                    'AbuseIO\Commands',
+                    'AbuseIO\Handlers\Commands'
                 );
             }
         );
@@ -33,5 +39,4 @@ class BusServiceProvider extends ServiceProvider
     {
         //
     }
-
 }

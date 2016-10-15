@@ -2,215 +2,376 @@
 
 namespace AbuseIO\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use AbuseIO\Http\Requests;
-use AbuseIO\Http\Requests\TicketsFormRequest;
+use AbuseIO\Http\Requests\TicketFormRequest;
+use AbuseIO\Jobs\EvidenceSave;
+use AbuseIO\Jobs\IncidentsProcess;
+use AbuseIO\Jobs\Notification;
+use AbuseIO\Jobs\TicketUpdate;
+use AbuseIO\Models\Event;
+use AbuseIO\Models\Evidence;
+use AbuseIO\Models\Incident;
 use AbuseIO\Models\Ticket;
-use AbuseIO\Models\Note;
-use Redirect;
+use DB;
 use Input;
-use Lang;
+use Log;
+use Redirect;
+use yajra\Datatables\Datatables;
 
+/**
+ * Class TicketsController.
+ */
 class TicketsController extends Controller
 {
-
-    /*
-     * Call the parent constructor to generate a base ACL
+    /**
+     * TicketsController constructor.
      */
     public function __construct()
     {
-        parent::__construct('createDynamicACL');
+        parent::__construct();
+
+        // is the logged in account allowed to execute an action on the Domain
+        $this->middleware('checkaccount:Ticket', ['except' => ['search', 'index', 'create', 'store', 'export']]);
     }
 
     /**
-     * Display all tickets
-     * @return Response
+     * Process datatables ajax request.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function search()
+    {
+        $auth_account = $this->auth_user->account;
+
+        $tickets = Ticket::select(
+            'tickets.id',
+            'tickets.ip',
+            'tickets.domain',
+            'tickets.type_id',
+            'tickets.class_id',
+            'tickets.status_id',
+            'tickets.ip_contact_account_id',
+            'tickets.ip_contact_reference',
+            'tickets.ip_contact_name',
+            'tickets.domain_contact_account_id',
+            'tickets.domain_contact_reference',
+            'tickets.domain_contact_name',
+            DB::raw('count(distinct events.id) as event_count'),
+            DB::raw('count(distinct notes.id) as notes_count')
+        )
+            ->leftJoin('events', 'events.ticket_id', '=', 'tickets.id')
+            ->leftJoin(
+                'notes',
+                function ($join) {
+                // We need a LEFT JOIN .. ON .. AND ..).
+                // This doesn't exist within Illuminate's JoinClause class
+                // So we use some nesting foo here
+                    $join->on('notes.ticket_id', '=', 'tickets.id')
+                        ->nest(
+                            function ($join) {
+                                $join->on('notes.viewed', '=', DB::raw("'false'"));
+                            }
+                        );
+                }
+            )
+            ->groupBy('tickets.id');
+
+        if (!$auth_account->isSystemAccount()) {
+            // We're using a grouped where clause here, otherwise the filtering option
+            // will always show the same result (all tickets)
+            $tickets = $tickets->where(
+                function ($query) use ($auth_account) {
+                    $query->where('tickets.ip_contact_account_id', '=', $auth_account->id)
+                        ->orWhere('tickets.domain_contact_account_id', '=', $auth_account->id);
+                }
+            );
+        }
+
+        return Datatables::of($tickets)
+            // Create the action buttons
+            ->addColumn(
+                'actions',
+                function ($ticket) {
+                    $actions = ' <a href="tickets/'.$ticket->id.
+                        '" class="btn btn-xs btn-primary"><span class="glyphicon glyphicon-eye-open"></span> '.
+                        trans('misc.button.show').'</a> ';
+
+                    return $actions;
+                }
+            )
+            ->editColumn(
+                'type_id',
+                function ($ticket) {
+                    return trans('types.type.'.$ticket->type_id.'.name');
+                }
+            )
+            ->editColumn(
+                'class_id',
+                function ($ticket) {
+                    return trans('classifications.'.$ticket->class_id.'.name');
+                }
+            )
+            ->editColumn(
+                'status_id',
+                function ($ticket) {
+                    return trans('types.status.abusedesk.'.$ticket->status_id.'.name');
+                }
+            )
+            ->make(true);
+    }
+
+    /**
+     * Display all tickets.
+     *
+     * @return \Illuminate\Http\Response
      */
     public function index()
     {
-        // When we came from the search page, create a Query
-        $tickets = Ticket::where(
-            function ($query) {
-                if (!empty(Input::get('ticket_id'))) {
-                    $query->where('id', Input::get('ticket_id'));
-                }
-                if (!empty(Input::get('ip_address'))) {
-                    $query->where('ip', Input::get('ip_address'));
-                }
-                if (!empty(Input::get('customer_code'))) {
-                    $query->where('ip_contact_reference', Input::get('customer_code'));
-                }
-                if (!empty(Input::get('customer_name'))) {
-                    $query->where('ip_contact_name', 'like', '%'.Input::get('customer_name').'%');
-                }
-                if (Input::get('classification') > 0) {
-                    $query->where('class_id', Input::get('classification'));
-                }
-                if (Input::get('type') > 0) {
-                    $query->where('type_id', Input::get('type'));
-                }
-                if (Input::get('status') > 0) {
-                    $query->where('status_id', Input::get('status'));
-                }
-                if (Input::get('state') > 0) {
-                    switch (Input::get('state')) {
-                        case 1:
-                            // Notified
-                            $query->where('notified_count', '>=', 1);
-                            break;
-                        case 2:
-                            // Not notified
-                        default:
-                            $query->where('notified_count', 0);
-                            break;
-                    }
-                }
-            }
-        )->paginate(10);
+        // Get translations for all statuses
+        $statuses = Event::getStatuses();
 
         return view('tickets.index')
-            ->with('tickets', $tickets)
-            ->with('user', $this->user);
+            ->with('types', Event::getTypes())
+            ->with('classes', Event::getClassifications())
+            ->with('statuses', $statuses['abusedesk'])
+            ->with('contact_statuses', $statuses['contact'])
+            ->with('auth_user', $this->auth_user);
     }
 
     /**
-     * Display all open tickets
-     * @return Response
-     */
-    public function statusOpen()
-    {
-        $tickets = Ticket::where('status_id', 1)->paginate(10);
-        return view('tickets.index')
-            ->with('tickets', $tickets)
-            ->with('user', $this->user);
-    }
-
-    /**
-     * Display all closed tickets
-     * @param Request $request
-     * @return Response
-     */
-    public function statusClosed()
-    {
-        $tickets = Ticket::where('status_id', 2)->paginate(10);
-        return view('tickets.index')
-            ->with('tickets', $tickets)
-            ->with('user', $this->user);
-    }
-
-    /**
-     * Show the form for creating a ticket
-     * @param Request $request
-     * @return Response
+     * Show the form for creating a ticket.
+     *
+     * @return \Illuminate\Http\Response
      */
     public function create()
     {
-
         return view('tickets.create')
-            ->with('user', $this->user);
-
+            ->with('classes', Event::getClassifications())
+            ->with('types', Event::getTypes())
+            ->with('auth_user', $this->auth_user);
     }
 
     /**
      * Export tickets to CSV format.
-     * @return Response
+     *
+     * @param string $format
+     *
+     * @return \Illuminate\Http\Response
      */
-    public function export()
+    public function export($format)
     {
+        // TODO #AIO-?? ExportProvider - (mark) Move this into an ExportProvider or something?
 
-        $tickets = Ticket::all();
-        $columns = [
-            'id' => 'Ticket ID',
-        ];
-
-        $output = '"' . implode('", "', $columns) . '"' . PHP_EOL;
-
-        foreach ($tickets as $ticket) {
-            $row = [
-                $ticket->id,
-            ];
-
-            $output .= '"' . implode('", "', $row) . '"' . PHP_EOL;
+        // only export all tickets when we are in the systemaccount
+        $auth_account = $this->auth_user->account;
+        if ($auth_account->isSystemAccount()) {
+            $tickets = Ticket::all();
+        } else {
+            $tickets = Ticket::select('tickets.*')
+              ->where('ip_contact_account_id', $auth_account->id)
+              ->orWhere('domain_contact_account_id', $auth_account);
         }
 
-        return response(substr($output, 0, -1), 200)
-            ->header('Content-Type', 'text/csv')
-            ->header('Content-Disposition', 'attachment; filename="Tickets.csv"');
+        if ($format === 'csv') {
+            $columns = [
+                'id'            => 'Ticket ID',
+                'ip'            => 'IP address',
+                'class_id'      => 'Classification',
+                'type_id'       => 'Type',
+                'first_seen'    => 'First seen',
+                'last_seen'     => 'Last seen',
+                'event_count'   => 'Events',
+                'status_id'     => 'Ticket Status',
+            ];
+
+            $output = '"'.implode('", "', $columns).'"'.PHP_EOL;
+
+            foreach ($tickets as $ticket) {
+                $row = [
+                    $ticket->id,
+                    $ticket->ip,
+                    trans("classifications.{$ticket->class_id}.name"),
+                    trans("types.type.{$ticket->type_id}.name"),
+                    $ticket->firstEvent[0]->seen,
+                    $ticket->lastEvent[0]->seen,
+                    $ticket->events->count(),
+                    trans("types.status.abusedesk.{$ticket->status_id}.name"),
+                ];
+
+                $output .= '"'.implode('", "', $row).'"'.PHP_EOL;
+            }
+
+            return response(substr($output, 0, -1), 200)
+                ->header('Content-Type', 'text/csv')
+                ->header('Content-Disposition', 'attachment; filename="Tickets.csv"');
+        }
+
+        return Redirect::route('admin.contacts.index')
+            ->with('message', "The requested format {$format} is not available for exports");
     }
 
     /**
      * Store a newly created ticket in storage.
-     * @return Response
+     *
+     * @param TicketFormRequest $ticket
+     *
+     * @return \Illuminate\Http\Response
      */
-    public function store(TicketsFormRequest $ticket)
+    public function store(TicketFormRequest $ticket)
     {
-        //only allowed in debug mode or something
-        //$input = Input::all();
-        //Ticket::create( $input );
-        //
-        //return Redirect::route('admin.tickets.index')->with('message', 'Ticket has been created');
+        /*
+         * If there was a file attached then we add this to the evidence as attachment
+         */
+        $attachment = [];
+        $uploadedFile = Input::file('evidenceFile');
+        if (!empty($uploadedFile) &&
+            is_object($uploadedFile) &&
+            $uploadedFile->getError() === 0 &&
+            is_file($uploadedFile->getPathname())
+        ) {
+            $attachment = [
+                'filename'    => $uploadedFile->getClientOriginalName(),
+                'size'        => $uploadedFile->getSize(),
+                'contentType' => $uploadedFile->getMimeType(),
+                'data'        => file_get_contents($uploadedFile->getPathname()),
+            ];
+        }
+
+        /*
+         * Grab the form and build a incident model from it. The form should be having all the fields except
+         * the form token. We don't need to validate the data as the formRequest already to care of this and
+         * IncidentsSave will do another validation on this.
+         */
+        $incident = new Incident();
+        foreach ($ticket->all() as $key => $value) {
+            if ($key != '_token') {
+                $incident->$key = $value;
+            }
+        }
+
+        /*
+         * Incident process required all incidents to be wrapped in an array.
+         */
+        $incidents = [
+            0 => $incident,
+        ];
+
+        /*
+         * Save the evidence as its required to save events
+         */
+        $evidence = new EvidenceSave();
+        $evidenceData = [
+            'createdBy'     => trim($this->auth_user->fullName()).' ('.$this->auth_user->email.')',
+            'receivedOn'    => time(),
+            'submittedData' => $ticket->all(),
+            'attachments'   => [],
+        ];
+        if (!empty($attachment)) {
+            $evidenceData['attachments'][0] = $attachment;
+        }
+        $evidenceFile = $evidence->save(json_encode($evidenceData));
+
+        if (!$evidenceFile) {
+            Log::error(
+                get_class($this).': '.
+                'Error returned while asking to write evidence file, cannot continue'
+            );
+            $this->exception();
+        }
+
+        $evidence = new Evidence();
+        $evidence->filename = $evidenceFile;
+        $evidence->sender = $this->auth_user->email;
+        $evidence->subject = 'AbuseDesk Created Incident';
+
+        /*
+         * Call IncidentsProcess to validate, store evidence and save incidents
+         */
+        $incidentsProcess = new IncidentsProcess($incidents, $evidence);
+
+        // Validate the data set
+        $validated = $incidentsProcess->validate();
+        if (!$validated) {
+            return Redirect::back()->with('message', "Failed to validate incident model {$validated}");
+        }
+
+        // Write the data set to database
+        if (!$incidentsProcess->save()) {
+            return Redirect::back()->with('message', 'Failed to write to database');
+        }
+
+        return Redirect::route(
+            'admin.tickets.index'
+        )->with(
+            'message',
+            'A new incident has been created. Depending on the aggregator result a new '.
+            'ticket will be created or existing ticket updated'
+        );
     }
 
     /**
      * Display the specified ticket.
-     * @param Request $request
+     *
      * @param Ticket $ticket
-     * @return Response
-     * @internal param int $id
+     *
+     * @return \Illuminate\Http\Response
      */
     public function show(Ticket $ticket)
     {
-
         return view('tickets.show')
             ->with('ticket', $ticket)
-            ->with('user', $this->user);
-
+            ->with('ticket_class', config("types.status.abusedesk.{$ticket->status_id}.class"))
+            ->with('contact_ticket_class', config("types.status.contact.{$ticket->contact_status_id}.class"))
+            ->with('auth_user', $this->auth_user);
     }
 
     /**
-     * Show the form for editing the specified ticket.
-     * @param  int  $id
-     * @return Response
+     * Update the requested contact information.
+     *
+     * @param Ticket $ticket
+     * @param string $only
+     *
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function edit(Ticket $ticket)
+    public function update(Ticket $ticket, $only = null)
     {
-        //only allowed in debug mode or something
-        //return view('tickets.edit')->with('ticket', $ticket);
+        TicketUpdate::contact($ticket, $only);
+
+        return Redirect::route('admin.tickets.show', $ticket->id)
+            ->with('message', 'Contact has been updated.');
     }
 
     /**
-     * Update the specified ticket in storage.
-     * @param  int  $id
-     * @return Response
+     * Set the status of a tickets.
+     *
+     * @param Ticket $ticket
+     * @param string $newstatus
+     *
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(Ticket $ticket)
+    public function status(Ticket $ticket, $newstatus)
     {
-        if (config('main.notes.show_abusedesk_names') === true) {
-            $postingUser = ' (' . $this->user->first_name . ' ' . $this->user->last_name . ')';
-        } else {
-            $postingUser = '';
-        }
+        TicketUpdate::status($ticket, $newstatus);
 
-        $note = new Note;
-        $note->ticket_id = $ticket->id;
-        $note->submitter = Lang::get('ash.communication.abusedesk'). $postingUser;
-        $note->text = Input::get('text');
-        $note->save();
-
-        return Redirect::route('admin.tickets.show', $ticket->id)->with('message', 'Ticket has been updated.');
+        return Redirect::route('admin.tickets.show', $ticket->id)
+            ->with('message', 'Ticket status has been updated.');
     }
 
     /**
-     * Remove the specified resource from storage.
-     * @param  int  $id
-     * @return Response
+     * Send a notification for this ticket to the IP contact.
+     *
+     * @param Ticket $ticket
+     * @param string $only
+     *
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy(Ticket $ticket)
+    public function notify(Ticket $ticket, $only = null)
     {
-        //only allowed in debug mode or something
-        //$ticket->delete();
-        //
-        //return Redirect::route('admin.tickets.index')->with('message', 'Ticket has been deleted.');
+        $notification = new Notification();
+        $notification->walkList(
+            $notification->buildList($ticket->id, false, true, $only)
+        );
+
+        return Redirect::route('admin.tickets.show', $ticket->id)
+            ->with('message', 'Contact has been notified.');
     }
 }

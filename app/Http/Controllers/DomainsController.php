@@ -2,96 +2,171 @@
 
 namespace AbuseIO\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use AbuseIO\Http\Requests;
 use AbuseIO\Http\Requests\DomainFormRequest;
-use AbuseIO\Http\Controllers\Controller;
-use AbuseIO\Models\Domain;
 use AbuseIO\Models\Contact;
+use AbuseIO\Models\Domain;
+use Form;
 use Redirect;
-use Input;
+use yajra\Datatables\Datatables;
 
+/**
+ * Class DomainsController.
+ */
 class DomainsController extends Controller
 {
-
-
-    /*
-     * Call the parent constructor to generate a base ACL
+    /**
+     * DomainsController constructor.
      */
     public function __construct()
     {
-        parent::__construct('createDynamicACL');
+        parent::__construct();
+
+        // is the logged in account allowed to execute an action on the Domain
+        $this->middleware('checkaccount:Domain', ['except' => ['search', 'index', 'create', 'store', 'export']]);
+    }
+
+    /**
+     * Process datatables ajax request.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function search()
+    {
+        $auth_account = $this->auth_user->account;
+
+        $domains = Domain::select('domains.*', 'contacts.name as contacts_name')
+            ->leftJoin('contacts', 'contacts.id', '=', 'domains.contact_id');
+
+        if (!$auth_account->isSystemAccount()) {
+            $domains = $domains
+                ->leftJoin('accounts', 'accounts.id', '=', 'contacts.account_id')
+                ->where('accounts.id', '=', $auth_account->id);
+        }
+
+        return Datatables::of($domains)
+            ->addColumn(
+                'actions',
+                function ($domain) {
+                    $actions = Form::open(
+                        [
+                            'route'  => ['admin.domains.destroy', $domain->id],
+                            'method' => 'DELETE',
+                            'class'  => 'form-inline',
+                        ]
+                    );
+                    $actions .= ' <a href="domains/'.$domain->id.
+                        '" class="btn btn-xs btn-primary"><i class="glyphicon glyphicon-eye-open"></i> '.
+                        trans('misc.button.show').'</a> ';
+                    $actions .= ' <a href="domains/'.$domain->id.
+                        '/edit" class="btn btn-xs btn-primary"><i class="glyphicon glyphicon-edit"></i> '.
+                        trans('misc.button.edit').'</a> ';
+                    $actions .= Form::button(
+                        '<i class="glyphicon glyphicon-remove"></i> '.trans('misc.button.delete'),
+                        [
+                            'type'  => 'submit',
+                            'class' => 'btn btn-danger btn-xs',
+                        ]
+                    );
+                    $actions .= Form::close();
+
+                    return $actions;
+                }
+            )
+            ->make(true);
     }
 
     /**
      * Display a listing of the resource.
-     * @return Response
+     *
+     * @return \Illuminate\Http\Response
      */
     public function index()
     {
-        $domains = Domain::with('contact')
-            ->paginate(10);
-
         return view('domains.index')
-            ->with('domains', $domains)
-            ->with('user', $this->user);
+            ->with('auth_user', $this->auth_user);
     }
 
     /**
      * Show the form for creating a new resource.
-     * @return Response
+     *
+     * @return \Illuminate\Http\Response
      */
     public function create()
     {
-        $contacts = Contact::lists('name', 'id');
+        $auth_account = $this->auth_user->account;
+
+        if (!$auth_account->isSystemAccount()) {
+            $contacts = Contact::select('contacts.*')
+                ->where('account_id', $auth_account->id)
+                ->get()->lists('name', 'id');
+        } else {
+            $contacts = Contact::lists('name', 'id');
+        }
 
         return view('domains.create')
             ->with('contact_selection', $contacts)
             ->with('selected', null)
-            ->with('user', $this->user);
+            ->with('auth_user', $this->auth_user);
     }
 
     /**
      * Export listing to CSV format.
-     * @return Response
+     *
+     * @param string $format
+     *
+     * @return \Illuminate\Http\Response
      */
-    public function export()
+    public function export($format)
     {
-        $domains = Domain::all();
+        $auth_account = $this->auth_user->account;
 
-        $columns = [
-            'contact' => 'Contact',
-            'domain' => 'Domain name',
-            'enabled' => 'Status',
-        ];
-
-        $output = '"' . implode('","', $columns) . '"' . PHP_EOL;
-
-        foreach ($domains as $domain) {
-            $row = [
-                $domain->contact->name . ' (' . $domain->contact->reference . ')',
-                $domain['name'],
-                $domain['enabled'] ? 'Enabled' : 'Disabled',
-            ];
-
-            $output .= '"' . implode('","', $row) . '"' . PHP_EOL;
+        if ($auth_account->isSystemAccount()) {
+            $domains = Domain::all();
+        } else {
+            $domains = Domain::select('domains.*')
+                ->leftJoin('contacts', 'contacts.id', '=', 'domains.contact_id')
+                ->leftJoin('accounts', 'accounts.id', '=', 'contacts.account_id')
+                ->where('accounts.id', '=', $auth_account->id);
         }
 
-        return response(substr($output, 0, -1), 200)
-            ->header('Content-Type', 'text/csv')
-            ->header('Content-Disposition', 'attachment; filename="Domains.csv"');
+        if ($format === 'csv') {
+            $columns = [
+                'contact'   => 'Contact',
+                'domain'    => 'Domain name',
+                'enabled'   => 'Status',
+            ];
+
+            $output = '"'.implode('","', $columns).'"'.PHP_EOL;
+
+            foreach ($domains as $domain) {
+                $row = [
+                    $domain->contact->name.' ('.$domain->contact->reference.')',
+                    $domain['name'],
+                    $domain['enabled'] ? 'Enabled' : 'Disabled',
+                ];
+
+                $output .= '"'.implode('","', $row).'"'.PHP_EOL;
+            }
+
+            return response(substr($output, 0, -1), 200)
+                ->header('Content-Type', 'text/csv')
+                ->header('Content-Disposition', 'attachment; filename="Domains.csv"');
+        }
+
+        return Redirect::route('admin.domains.index')
+            ->with('message', "The requested format {$format} is not available for exports");
     }
 
     /**
      * Store a newly created resource in storage.
-     * @return Response
+     *
+     * @param DomainFormRequest $domainForm
+     *
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(DomainFormRequest $domain)
+    public function store(DomainFormRequest $domainForm)
     {
-        $input = Input::all();
-
-        Domain::create($input);
+        Domain::create($domainForm->all());
 
         return Redirect::route('admin.domains.index')
             ->with('message', 'Domain has been created');
@@ -99,46 +174,55 @@ class DomainsController extends Controller
 
     /**
      * Display the specified resource.
-     * @param Request $request
+     *
      * @param Domain $domain
-     * @return Response
-     * @internal param int $id
+     *
+     * @return \Illuminate\Http\Response
      */
     public function show(Domain $domain)
     {
         return view('domains.show')
             ->with('domain', $domain)
-            ->with('user', $this->user);
+            ->with('auth_user', $this->auth_user);
     }
 
     /**
      * Show the form for editing the specified resource.
+     *
      * @param Domain $domain
-     * @return Response
-     * @internal param int $id
+     *
+     * @return \Illuminate\Http\Response
      */
     public function edit(Domain $domain)
     {
-        $contacts = Contact::lists('name', 'id');
+        $auth_account = $this->auth_user->account;
+
+        if (!$auth_account->isSystemAccount()) {
+            $contacts = Contact::select('contacts.*')
+                ->where('account_id', $auth_account->id)
+                ->get()->lists('name', 'id');
+        } else {
+            $contacts = Contact::lists('name', 'id');
+        }
 
         return view('domains.edit')
             ->with('domain', $domain)
             ->with('contact_selection', $contacts)
             ->with('selected', $domain->contact_id)
-            ->with('user', $this->user);
+            ->with('auth_user', $this->auth_user);
     }
 
     /**
      * Update the specified resource in storage.
-     * @param Domain $domain
-     * @return Response
-     * @internal param int $id
+     *
+     * @param DomainFormRequest $domainForm
+     * @param Domain            $domain
+     *
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(Domain $domain)
+    public function update(DomainFormRequest $domainForm, Domain $domain)
     {
-        $input = array_except(Input::all(), '_method');
-
-        $domain->update($input);
+        $domain->update($domainForm->all());
 
         return Redirect::route('admin.domains.show', $domain->id)
             ->with('message', 'Domain has been updated.');
@@ -146,8 +230,10 @@ class DomainsController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     * @param  int $id
-     * @return Response
+     *
+     * @param Domain $domain
+     *
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(Domain $domain)
     {

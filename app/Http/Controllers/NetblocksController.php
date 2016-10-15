@@ -2,166 +2,246 @@
 
 namespace AbuseIO\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use AbuseIO\Http\Requests;
 use AbuseIO\Http\Requests\NetblockFormRequest;
-use AbuseIO\Http\Controllers\Controller;
-use AbuseIO\Models\Netblock;
 use AbuseIO\Models\Contact;
+use AbuseIO\Models\Netblock;
+use Form;
 use Redirect;
-use Input;
-use ICF;
+use yajra\Datatables\Datatables;
 
+/**
+ * Class NetblocksController.
+ */
 class NetblocksController extends Controller
 {
-
-
-    /*
-     * Call the parent constructor to generate a base ACL
+    /**
+     * NetblocksController constructor.
      */
     public function __construct()
     {
-        parent::__construct('createDynamicACL');
+        parent::__construct();
+
+        // is the logged in account allowed to execute an action on the Domain
+        $this->middleware('checkaccount:Netblock', ['except' => ['search', 'index', 'create', 'store', 'export']]);
+    }
+
+    /**
+     * Process datatables ajax request.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function search()
+    {
+        $auth_account = $this->auth_user->account;
+
+        $netblocks = Netblock::select('netblocks.*', 'contacts.name as contacts_name')
+            ->leftJoin('contacts', 'contacts.id', '=', 'netblocks.contact_id');
+
+        if (!$auth_account->isSystemAccount()) {
+            $netblocks = $netblocks
+                ->leftJoin('accounts', 'accounts.id', '=', 'contacts.account_id')
+                ->where('accounts.id', '=', $auth_account->id);
+        }
+
+        return Datatables::of($netblocks)
+            ->addColumn(
+                'actions',
+                function ($netblock) {
+                    $actions = Form::open(
+                        [
+                            'route'  => ['admin.netblocks.destroy', $netblock->id],
+                            'method' => 'DELETE',
+                            'class'  => 'form-inline',
+                        ]
+                    );
+                    $actions .= ' <a href="netblocks/'.$netblock->id.
+                        '" class="btn btn-xs btn-primary"><span class="glyphicon glyphicon-eye-open"></span> '.
+                        trans('misc.button.show').'</a> ';
+                    $actions .= ' <a href="netblocks/'.$netblock->id.
+                        '/edit" class="btn btn-xs btn-primary"><span class="glyphicon glyphicon-edit"></span> '.
+                        trans('misc.button.edit').'</a> ';
+                    $actions .= Form::button(
+                        '<span class="glyphicon glyphicon-remove"></span> '.trans('misc.button.delete'),
+                        [
+                            'type'  => 'submit',
+                            'class' => 'btn btn-danger btn-xs',
+                        ]
+                    );
+                    $actions .= Form::close();
+
+                    return $actions;
+                }
+            )
+            ->make(true);
     }
 
     /**
      * Display a listing of the resource.
-     * @return Response
+     *
+     * @return \Illuminate\Http\Response
      */
     public function index()
     {
-        $netblocks = Netblock::with('contact')
-                        ->paginate(10);
-
         return view('netblocks.index')
-            ->with('netblocks', $netblocks)
-            ->with('user', $this->user);
+            ->with('auth_user', $this->auth_user);
     }
 
     /**
      * Show the form for creating a new resource.
-     * @return Response
+     *
+     * @return \Illuminate\Http\Response
      */
     public function create()
     {
-        $contacts = Contact::lists('name', 'id');
+        $auth_account = $this->auth_user->account;
+
+        if (!$auth_account->isSystemAccount()) {
+            $contacts = Contact::select('contacts.*')
+                ->where('account_id', $auth_account->id)
+                ->get()->lists('name', 'id');
+        } else {
+            $contacts = Contact::lists('name', 'id');
+        }
 
         return view('netblocks.create')
             ->with('contact_selection', $contacts)
             ->with('selected', null)
-            ->with('user', $this->user);
+            ->with('auth_user', $this->auth_user);
     }
 
     /**
      * Export listing to CSV format.
-     * @return Response
+     *
+     * @param string $format
+     *
+     * @return \Illuminate\Http\Response
      */
-    public function export()
+    public function export($format)
     {
-        $netblocks  = Netblock::all();
+        $auth_account = $this->auth_user->account;
 
-        $columns = [
-            'contact'   => 'Contact',
-            'enabled'   => 'Status',
-            'first_ip'  => 'First IP',
-            'last_ip'   => 'Last IP'
-        ];
-
-        $output = '"' . implode('", "', $columns) . '"' . PHP_EOL;
-
-        foreach ($netblocks as $netblock) {
-            $row = [
-                $netblock->contact->name . ' (' .$netblock->contact->reference . ')',
-                ICF::inetItop($netblock['first_ip']),
-                ICF::inetItop($netblock['last_ip']),
-                $netblock['enabled'] ? 'Enabled' : 'Disabled',
-            ];
-
-            $output .= '"' . implode('", "', $row) . '"' . PHP_EOL;
+        if ($auth_account->isSystemAccount()) {
+            $netblocks = Netblock::all();
+        } else {
+            $netblocks = Netblock::select('netblocks.*')
+                ->leftJoin('contacts', 'contacts.id', '=', 'netblocks.contact_id')
+                ->leftJoin('accounts', 'accounts.id', '=', 'contacts.account_id')
+                ->where('accounts.id', '=', $auth_account->id);
         }
 
-        return response(substr($output, 0, -1), 200)
-            ->header('Content-Type', 'text/csv')
-            ->header('Content-Disposition', 'attachment; filename="Netblocks.csv"');
+        if ($format === 'csv') {
+            $columns = [
+                'contact'   => 'Contact',
+                'enabled'   => 'Status',
+                'first_ip'  => 'First IP',
+                'last_ip'   => 'Last IP',
+            ];
+
+            $output = '"'.implode('", "', $columns).'"'.PHP_EOL;
+
+            foreach ($netblocks as $netblock) {
+                $row = [
+                    $netblock->contact->name.' ('.$netblock->contact->reference.')',
+                    $netblock['first_ip'],
+                    $netblock['last_ip'],
+                    $netblock['enabled'] ? 'Enabled' : 'Disabled',
+                ];
+
+                $output .= '"'.implode('", "', $row).'"'.PHP_EOL;
+            }
+
+            return response(substr($output, 0, -1), 200)
+                ->header('Content-Type', 'text/csv')
+                ->header('Content-Disposition', 'attachment; filename="Netblocks.csv"');
+        }
+
+        return Redirect::route('admin.contacts.index')
+            ->with('message', "The requested format {$format} is not available for exports");
     }
 
     /**
      * Store a newly created resource in storage.
-     * @return Response
+     *
+     * @param NetblockFormRequest $netblockForm
+     *
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(NetblockFormRequest $netblock)
+    public function store(NetblockFormRequest $netblockForm)
     {
-        $input = Input::all();
-        $input['first_ip'] =  ICF::inetPtoi($input['first_ip']);
-        $input['last_ip']  =  ICF::inetPtoi($input['last_ip']);
-
-        Netblock::create($input);
+        Netblock::create($netblockForm->all());
 
         return Redirect::route('admin.netblocks.index')
-            ->with('message', 'Netblock has been created');
+            ->with('message', trans('netblocks.msg.added'));
     }
 
     /**
      * Display the specified resource.
+     *
      * @param Netblock $netblock
-     * @return Response
-     * @internal param int $id
+     *
+     * @return \Illuminate\Http\Response
      */
     public function show(Netblock $netblock)
     {
         return view('netblocks.show')
             ->with('netblock', $netblock)
-            ->with('user', $this->user);
+            ->with('auth_user', $this->auth_user);
     }
 
     /**
      * Show the form for editing the specified resource.
+     *
      * @param Netblock $netblock
-     * @return Response
-     * @internal param int $id
+     *
+     * @return \Illuminate\Http\Response
      */
     public function edit(Netblock $netblock)
     {
-        $contacts = Contact::lists('name', 'id');
+        $auth_account = $this->auth_user->account;
 
-        $netblock->first_ip = ICF::inetItop($netblock->first_ip);
-        $netblock->last_ip  = ICF::inetItop($netblock->last_ip);
+        if (!$auth_account->isSystemAccount()) {
+            $contacts = Contact::select('contacts.*')
+                ->where('account_id', $auth_account->id)
+                ->get()->lists('name', 'id');
+        } else {
+            $contacts = Contact::lists('name', 'id');
+        }
 
         return view('netblocks.edit')
             ->with('netblock', $netblock)
             ->with('contact_selection', $contacts)
             ->with('selected', $netblock->contact_id)
-            ->with('user', $this->user);
+            ->with('auth_user', $this->auth_user);
     }
 
     /**
      * Update the specified resource in storage.
-     * @param  int  $id
-     * @return Response
+     *
+     * @param NetblockFormRequest $netblockForm
+     * @param Netblock            $netblock
+     *
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(Netblock $netblock)
+    public function update(NetblockFormRequest $netblockForm, Netblock $netblock)
     {
-        $input = array_except(Input::all(), '_method');
-        $input['first_ip'] =  ICF::inetPtoi($input['first_ip']);
-        $input['last_ip']  =  ICF::inetPtoi($input['last_ip']);
-
-        $netblock->update($input);
+        $netblock->update($netblockForm->all());
 
         return Redirect::route('admin.netblocks.show', $netblock->id)
-            ->with('message', 'Netblock has been updated.');
+            ->with('message', trans('netblocks.msg.updated'));
     }
 
     /**
      * Remove the specified resource from storage.
-     * @param  int  $id
-     * @return Response
+     *
+     * @param Netblock $netblock
+     *
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(Netblock $netblock)
     {
         $netblock->delete();
 
         return Redirect::route('admin.netblocks.index')
-            ->with('message', 'Netblock has been deleted.');
+            ->with('message', trans('netblocks.msg.deleted'));
     }
 }

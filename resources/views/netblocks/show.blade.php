@@ -1,7 +1,7 @@
 @extends('app')
 
 @section('content')
-<h1 class="page-header">{{ trans('netblocks.headers.detail') }}: {{ $netblock->name }}</h1>
+<h1 class="page-header">{{ trans('netblocks.header.detail') }}:</h1>
 <div class="row">
     <div  class="col-md-3 col-md-offset-9 text-right">
         {!! Form::open(['class' => 'form-inline', 'method' => 'DELETE', 'route' => ['admin.netblocks.destroy', $netblock->id]]) !!}
@@ -15,10 +15,10 @@
     <dd>{{ $netblock->id }}</dd>
 
     <dt>{{ trans('netblocks.first_ip') }}</dt>
-    <dd>{{ ICF::inetItop($netblock->first_ip) }}</dd>
+    <dd>{{ $netblock->first_ip }}</dd>
 
     <dt>{{ trans('netblocks.last_ip') }}</dt>
-    <dd>{{ ICF::inetItop($netblock->last_ip) }}</dd>
+    <dd>{{ $netblock->last_ip }}</dd>
 
     <dt>{{ trans('misc.contact') }}</dt>
     <dd>{{ $netblock->contact->name }} ({{ $netblock->contact->reference }})</dd>
@@ -26,8 +26,7 @@
     <dt>{{ trans('misc.description') }}</dt>
     <dd>{{ $netblock->description }}</dd>
 
-    <dt>Status</dt>
+    <dt>{{ trans('misc.status') }}</dt>
     <dd>{{ $netblock->enabled ? trans('misc.enabled') : trans('misc.disabled') }}</dd>
 </dl>
-{!! link_to_route('admin.netblocks.index', trans('misc.button.back'), [], ['class' => 'btn btn-default top-buffer']) !!}
 @endsection

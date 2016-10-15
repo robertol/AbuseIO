@@ -2,13 +2,16 @@
 
 namespace AbuseIO\Http\Requests;
 
-use AbuseIO\Http\Requests\Request;
 use AbuseIO\Models\User;
 
+/**
+ * Class UserFormRequest.
+ */
 class UserFormRequest extends Request
 {
     /**
      * Determine if the user is authorized to make this request.
+     *
      * @return bool
      */
     public function authorize()
@@ -18,32 +21,26 @@ class UserFormRequest extends Request
 
     /**
      * Get the validation rules that apply to the request.
+     *
      * @return array
      */
     public function rules()
     {
         switch ($this->method) {
+            case 'GET':
+                break;
+            case 'DELETE':
+                break;
             case 'POST':
-                return [
-                    'first_name'    => 'required',
-                    'last_name'     => 'sometimes|required',
-                    'email'         => 'required|unique:users,email|email',
-                    'password'      => 'sometimes|confirmed|min:6',
-                    'account_id'    => 'required',
-                ];
+                return User::createRules();
             case 'PUT':
+                break;
             case 'PATCH':
-                return [
-                    'first_name'    => 'required',
-                    'last_name'     => 'sometimes|required',
-                    'email'         => 'required|unique:users,email,'. $this->id .'|email',
-                    'password'      => 'sometimes|confirmed|min:6',
-                    'account_id'    => 'required',
-
-                    //|unique:user,name,'. $this->id,
-                ];
+                return User::updateRules($this);
             default:
                 break;
         }
+
+        return [];
     }
 }

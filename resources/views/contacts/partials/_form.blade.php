@@ -15,28 +15,27 @@
 <div class="form-group @if ($errors->has('email')) has-error @endif">
     {!! Form::label('email', trans('misc.email').':', ['class' => 'col-sm-2 control-label']) !!}
     <div class="col-sm-10">
-        {!! Form::email('email', null, ['class' => 'form-control']) !!}
+        {!! Form::email('email', null, ['class' => 'form-control', 'multiple' => 'true']) !!}
         @if ($errors->has('email')) <p class="help-block">{{ $errors->first('email') }}</p> @endif
     </div>
 </div>
-<div class="form-group @if ($errors->has('rpc_host')) has-error @endif">
-    {!! Form::label('rpc_host', trans('contacts.rpchost').':', ['class' => 'col-sm-2 control-label']) !!}
+<div class="form-group @if ($errors->has('api_host')) has-error @endif">
+    {!! Form::label('api_host', trans('contacts.api_host').':', ['class' => 'col-sm-2 control-label']) !!}
     <div class="col-sm-10">
-        {!! Form::url('rpc_host', null, ['class' => 'form-control', 'placeholder'=> 'http://rpc.domain.tld:1234/RPC']) !!}
-        @if ($errors->has('rpc_host')) <p class="help-block">{{ $errors->first('rpc_host') }}</p> @endif
-    </div>
-</div>
-<div class="form-group @if ($errors->has('rpc_key')) has-error @endif">
-    {!! Form::label('rpc_key', trans('contacts.rpckey').':', ['class' => 'col-sm-2 control-label']) !!}
-    <div class="col-sm-10">
-        {!! Form::text('rpc_key', null, ['class' => 'form-control']) !!}
-        @if ($errors->has('rpc_key')) <p class="help-block">{{ $errors->first('rpc_key') }}</p> @endif
+        {!! Form::url('api_host', null, ['class' => 'form-control', 'placeholder'=> 'http://api.domain.tld:1234/RPC']) !!}
+        @if ($errors->has('api_host')) <p class="help-block">{{ $errors->first('api_host') }}</p> @endif
     </div>
 </div>
 <div class="form-group">
     {!! Form::label('auto_notify', trans('contacts.notification').':', ['class' => 'col-sm-2 control-label']) !!}
     <div class="col-sm-10">
         {!! Form::select('auto_notify', [0 => trans('misc.manual'), 1 => trans('misc.automatic')], null, ['class' => 'form-control']) !!}
+    </div>
+</div>
+<div class="form-group">
+    {!! Form::label('enabled', trans('misc.status').':', ['class' => 'col-sm-2 control-label']) !!}
+    <div class="col-sm-10">
+        {!! Form::select('enabled', [1 => trans('misc.enabled'), 0 => trans('misc.disabled')], null, ['class' => 'form-control']) !!}
     </div>
 </div>
 <div class="form-group">

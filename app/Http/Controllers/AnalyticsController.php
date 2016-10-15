@@ -2,32 +2,32 @@
 
 namespace AbuseIO\Http\Controllers;
 
-use AbuseIO\Http\Requests;
 use AbuseIO\Models\Ticket;
-use Illuminate\Http\Request;
 use Lang;
 
+/**
+ * Class AnalyticsController.
+ */
 class AnalyticsController extends Controller
 {
-
-    /*
-     * Call the parent constructor to generate a base ACL
+    /**
+     * AnalyticsController constructor.
      */
     public function __construct()
     {
-        parent::__construct('createDynamicACL');
+        parent::__construct();
     }
 
     /**
      * Display a listing of the resource.
-     * @param Request $request
-     * @return Response
+     *
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function index()
     {
-        $classCounts = [ ];
+        $classCounts = [];
 
-        foreach (Lang::get('classifications') as $classID => $classInfo) {
+        foreach ((array) Lang::get('classifications') as $classID => $classInfo) {
             $classTotal = new \stdClass();
 
             $tickets = Ticket::where('class_id', $classID);
@@ -40,11 +40,10 @@ class AnalyticsController extends Controller
 
                 $classCounts[] = $classTotal;
             }
-
         }
 
         return view('analytics')
             ->with('classCounts', $classCounts)
-            ->with('user', $this->user);
+            ->with('auth_user', $this->auth_user);
     }
 }

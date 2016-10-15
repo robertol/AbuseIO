@@ -42,6 +42,24 @@ $app->singleton(
 );
 
 /*
+ * Configure Monolog.
+ */
+$app->configureMonologUsing(
+
+    function (Monolog\Logger $monolog) {
+
+        $syslog = new \Monolog\Handler\SyslogHandler('abuseio');
+
+        $formatter = new \Monolog\Formatter\LineFormatter('%channel%.%level_name%: %message%');
+
+        $syslog->setFormatter($formatter);
+
+        $monolog->pushHandler($syslog);
+    }
+
+);
+
+/*
 |--------------------------------------------------------------------------
 | Return The Application
 |--------------------------------------------------------------------------

@@ -1,13 +1,9 @@
 <?php
- 
+
+/**
+ * Translations for Profile.
+ */
 return [
- 
-    /*
-        |--------------------------------------------------------------------------
-        | Profile Language Lines
-        |--------------------------------------------------------------------------
-        |
-        */
-    'password' => 'Password',
-    'password_confirmation' => 'Password (repeat)'
+    'password'              => 'Password',
+    'password_confirmation' => 'Password (repeat)',
 ];

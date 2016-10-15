@@ -14,24 +14,28 @@ env:
   - DB=mysql
 
 before_script:
-  - echo 'yes' | pecl install mailparse
+  - cp .env.travis .env
+  - echo 'yes' | pecl install mailparse-2.1.6
   - mysql -e 'CREATE DATABASE `abuseio`;'
   - composer self-update
   - composer install --dev --prefer-source --no-interaction
-  - chmod -R 777 storage
+  - chmod -R 770 storage
   - php artisan migrate:install --no-interaction -vvv
   - chmod +x extra/notifier-samples/runall
+  - wget -O bootstrap/app.php https://raw.githubusercontent.com/laravel/laravel/5.1/bootstrap/app.php
+  - sed -i 's/App\\/AbuseIO\\/g' bootstrap/app.php
 
 script:
   - php artisan migrate --env=testing --no-interaction -vvv
   - php artisan db:seed --env=testing --no-interaction -vvv
+  - extra/notifier-samples/runall-noqueue
+  - php artisan note:create 1 Abusedesk 'Test Note' true false
   - vendor/bin/phpunit
-  - extra/notifier-samples/runall
   - php artisan migrate:rollback --env=testing --no-interaction -vvv
 
 after_script:
   - ls -laR storage/mailarchive
-  - cat storage/logs/*.log
+  - cat storage/logs/*
 
 notifications:
   email:

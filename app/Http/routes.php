@@ -1,142 +1,141 @@
 <?php
+
 Route::controllers(
     [
-        'auth' => 'Auth\AuthController',
+        'auth'     => 'Auth\AuthController',
         'password' => 'Auth\PasswordController',
     ]
 );
 
-// Go to admin home when / is called.
+// Redirect the default page to the dashboard (or login)
 Route::get(
-    "/",
+    '/',
     function () {
         return Redirect::to('/admin/home');
     }
 );
 
-// All calls within the 'admin' prefix
+/*
+ * Admin routes
+ */
 Route::group(
     [
-        'prefix' => 'admin',
+        'prefix'     => 'admin',
         'middleware' => [
             'auth',
-            'acl:admin_login'
+            'permission:login_portal',
         ],
+        'as' => 'admin.',
     ],
     function () {
 
+        // Language switcher
+        Route::get('locale/{locale?}', 'LocaleController@setLocale');
+
+        // Brands logo display
+        Route::get('logo/{id}', 'BrandsController@logo');
+
+        // Dashboard
         Route::get(
-            "/",
+            '/',
             function () {
                 return Redirect::to('/admin/home');
             }
         );
+        Route::get('/home', 'HomeController@index');
 
+        // Version check
         Route::get(
-            'home',
-            'HomeController@index'
-        );
-
-        // Contact routes
-        Route::model('contacts', 'AbuseIO\Models\Contact');
-        Route::resource('contacts', 'ContactsController');
-        Route::get(
-            'export/contacts',
+            '/version',
             [
-                'as' => 'admin.export.contacts',
-                'uses' => 'ContactsController@export',
+                'as'   => 'version',
+                'uses' => 'HomeController@version',
             ]
         );
 
-        // Netblock routes
-        Route::model('netblocks', 'AbuseIO\Models\Netblock');
-        Route::resource('netblocks', 'NetblocksController');
-        Route::get(
-            'export/netblocks',
-            [
-                'as' => 'admin.export.netblocks',
-                'uses' => 'NetblocksController@export',
-            ]
-        );
+        // Contacts
+        require app_path().'/Http/Routes/Contacts.php';
 
-        // Domain routes
-        Route::model('domains', 'AbuseIO\Models\Domain');
-        Route::resource('domains', 'DomainsController');
-        Route::get(
-            'export/domains',
-            [
-                'as' => 'admin.export.domains',
-                'uses' => 'DomainsController@export',
-            ]
-        );
+        // Netblocks
+        require app_path().'/Http/Routes/Netblocks.php';
 
-        // Tickets routes
-        Route::model('tickets', 'AbuseIO\Models\Ticket');
-        Route::resource('tickets', 'TicketsController');
-        Route::get(
-            'export/tickets',
-            [
-                'as' => 'admin.export.tickets',
-                'uses' => 'TicketsController@export',
-            ]
-        );
+        // Domains
+        require app_path().'/Http/Routes/Domains.php';
 
-        Route::group(
-            [
-                'prefix' => 'tickets/status'
-            ],
-            function () {
-                Route::resource('open', 'TicketsController@statusOpen');
-                Route::resource('closed', 'TicketsController@statusClosed');
-            }
-        );
+        // Tickets
+        require app_path().'/Http/Routes/Tickets.php';
 
-        // Search routes
-        Route::get('search', 'SearchController@index');
+        // Evidence
+        require app_path().'/Http/Routes/Evidence.php';
 
-        // Analytics routes
-        Route::get('analytics', 'AnalyticsController@index');
+        // Notes
+        require app_path().'/Http/Routes/Notes.php';
 
-        // Language switcher
-        Route::get('locale/{locale?}', 'LocaleController@setLocale');
+        // Analytics
+        require app_path().'/Http/Routes/Analytics.php';
 
         // Settings related
-        Route::model('accounts', 'AbuseIO\Models\Account');
-        Route::resource('accounts', 'AccountsController');
+        require app_path().'/Http/Routes/SettingsAccounts.php';
+        require app_path().'/Http/Routes/SettingsBrands.php';
+        require app_path().'/Http/Routes/SettingsUsers.php';
+        require app_path().'/Http/Routes/Profile.php';
 
-        Route::model('brands', 'AbuseIO\Models\Brand');
-        Route::resource('brands', 'BrandsController');
-        Route::get('logo/{id}', 'BrandsController@logo');
-
-        Route::model('users', 'AbuseIO\Models\User');
-        Route::resource('users', 'UsersController');
-
-        Route::resource('profile', 'ProfilesController');
     }
 );
 
-// Ash routes
+/*
+ * Ash routes
+ */
 Route::group(
     [
         'prefix' => 'ash',
+        'as'     => 'ash.',
     ],
     function () {
-        Route::get('collect/{ticketID}/{token}', 'AshController@index');
+        Route::get(
+            'collect/{ticketID}/{token}',
+            [
+                'as'         => 'show',
+                'uses'       => 'AshController@index',
+                'middleware' => [
+                    'ash.token',
+                ],
+            ]
+        );
+
+        Route::post(
+            'collect/{ticketID}/{token}',
+            [
+                'as'         => 'update',
+                'uses'       => 'AshController@addNote',
+                'middleware' => [
+                    'ash.token',
+                ],
+            ]
+        );
 
         // Language switcher
-        Route::get('locale/{locale?}', 'LocaleController@setLocale');
+        Route::get(
+            'locale/{locale?}',
+            [
+                'as'         => 'setlocale',
+                'uses'       => 'LocaleController@setLocale',
+                'middleware' => [
+                    //
+                ],
+            ]
+        );
 
         // Logos
-        Route::get('logo/{id}', 'BrandsController@logo');
-    }
-);
-
-// Api routes
-Route::group(
-    [
-        'prefix' => 'api',
-    ],
-    function () {
-        // TODO
+        Route::get(
+            'logo/{id}',
+            [
+                'as'         => 'logo',
+                'uses'       => 'BrandsController@logo',
+                'middleware' => [
+                    //
+                ],
+            ]
+        );
     }
 );

@@ -2,8 +2,23 @@
 
 return [
 
-    'name' => 'AbuseIO',
-    'version' => '4.0.0',
+    'name'    => 'AbuseIO',
+    'version' => '4.0.1',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Application filesystem/environment permissions
+    |--------------------------------------------------------------------------
+    |
+    | By default installations should be using a dedicated user 'abuseio' with
+    | the group 'abuseio' on the system. However in some case you cannot use
+    | these names and with the below settings you can override the defaults
+    |
+    */
+
+    'user'  => env('APP_LOCALUSER', 'abuseio'),
+    'group' => env('APP_LOCALGROUP', 'abuseio'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Debug Mode
@@ -42,6 +57,18 @@ return [
     */
 
     'timezone' => 'UTC',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Application Date & Time format
+    |--------------------------------------------------------------------------
+    |
+    | See http://php.net/manual/en/function.date.php for more information
+    | about setting your own format.
+    */
+
+    'date_format' => 'd-m-Y',
+    'time_format' => 'H:i:s P',
 
     /*
     |--------------------------------------------------------------------------
@@ -92,6 +119,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Installation ID
+    |--------------------------------------------------------------------------
+    |
+    | This key is used to identify this installation when using inter-AbuseIO
+    | communications with one or more instances. Once set you should never
+    | change this ID unless you are very sure!
+    |
+    */
+
+    'id' => env('APP_ID', 'DEFAULT'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Logging Configuration
     |--------------------------------------------------------------------------
     |
@@ -103,7 +143,7 @@ return [
     |
     */
 
-    'log' => 'daily',
+    'log' => env('APP_LOG', 'syslog'),
 
     /*
     |--------------------------------------------------------------------------
@@ -154,9 +194,10 @@ return [
         'AbuseIO\Providers\ConfigServiceProvider',
         'AbuseIO\Providers\EventServiceProvider',
         'AbuseIO\Providers\RouteServiceProvider',
-        'AbuseIO\Providers\ParserconfigServiceProvider',
-        'AbuseIO\Providers\MainconfigServiceProvider',
+        'AbuseIO\Providers\ValidationsServiceProvider',
+        'AbuseIO\Providers\HelperServiceProvider',
         'Chumper\Zipper\ZipperServiceProvider',
+        'yajra\Datatables\DatatablesServiceProvider',
 
         /*
          * Developer Providers
@@ -178,45 +219,45 @@ return [
 
     'aliases' => [
 
-        'App'       => 'Illuminate\Support\Facades\App',
-        'Artisan'   => 'Illuminate\Support\Facades\Artisan',
-        'Auth'      => 'Illuminate\Support\Facades\Auth',
-        'Blade'     => 'Illuminate\Support\Facades\Blade',
-        'Bus'       => 'Illuminate\Support\Facades\Bus',
-        'Cache'     => 'Illuminate\Support\Facades\Cache',
-        'Config'    => 'Illuminate\Support\Facades\Config',
-        'Cookie'    => 'Illuminate\Support\Facades\Cookie',
-        'Crypt'     => 'Illuminate\Support\Facades\Crypt',
-        'DB'        => 'Illuminate\Support\Facades\DB',
-        'Eloquent'  => 'Illuminate\Database\Eloquent\Model',
-        'Event'     => 'Illuminate\Support\Facades\Event',
-        'File'      => 'Illuminate\Support\Facades\File',
-        'Gate'      => Illuminate\Support\Facades\Gate::class,
-        'Hash'      => 'Illuminate\Support\Facades\Hash',
-        'Input'     => 'Illuminate\Support\Facades\Input',
-        'Inspiring' => 'Illuminate\Foundation\Inspiring',
-        'Lang'      => 'Illuminate\Support\Facades\Lang',
-        'Log'       => 'Illuminate\Support\Facades\Log',
-        'Mail'      => 'Illuminate\Support\Facades\Mail',
-        'Password'  => 'Illuminate\Support\Facades\Password',
-        'Queue'     => 'Illuminate\Support\Facades\Queue',
-        'Redirect'  => 'Illuminate\Support\Facades\Redirect',
-        'Redis'     => 'Illuminate\Support\Facades\Redis',
-        'Request'   => 'Illuminate\Support\Facades\Request',
-        'Response'  => 'Illuminate\Support\Facades\Response',
-        'Route'     => 'Illuminate\Support\Facades\Route',
-        'Schema'    => 'Illuminate\Support\Facades\Schema',
-        'Session'   => 'Illuminate\Support\Facades\Session',
-        'Storage'   => 'Illuminate\Support\Facades\Storage',
-        'URL'       => 'Illuminate\Support\Facades\URL',
-        'Validator' => 'Illuminate\Support\Facades\Validator',
-        'View'      => 'Illuminate\Support\Facades\View',
-        'Form'      => 'Collective\Html\FormFacade',
-        'Html'      => 'Collective\Html\HtmlFacade',
-        'Uuid'      => 'Webpatser\Uuid\Uuid',
-        'Carbon'    => 'Carbon\Carbon',
-        'Zipper'    => 'Chumper\Zipper\Zipper',
-        'ICF'       => 'AbuseIO\ICF',
+        'App'        => 'Illuminate\Support\Facades\App',
+        'Artisan'    => 'Illuminate\Support\Facades\Artisan',
+        'Auth'       => 'Illuminate\Support\Facades\Auth',
+        'Blade'      => 'Illuminate\Support\Facades\Blade',
+        'Bus'        => 'Illuminate\Support\Facades\Bus',
+        'Cache'      => 'Illuminate\Support\Facades\Cache',
+        'Config'     => 'Illuminate\Support\Facades\Config',
+        'Cookie'     => 'Illuminate\Support\Facades\Cookie',
+        'Crypt'      => 'Illuminate\Support\Facades\Crypt',
+        'Datatables' => yajra\Datatables\Datatables::class,
+        'DB'         => 'Illuminate\Support\Facades\DB',
+        'Eloquent'   => 'Illuminate\Database\Eloquent\Model',
+        'Event'      => 'Illuminate\Support\Facades\Event',
+        'File'       => 'Illuminate\Support\Facades\File',
+        'Gate'       => Illuminate\Support\Facades\Gate::class,
+        'Hash'       => 'Illuminate\Support\Facades\Hash',
+        'Input'      => 'Illuminate\Support\Facades\Input',
+        'Inspiring'  => 'Illuminate\Foundation\Inspiring',
+        'Lang'       => 'Illuminate\Support\Facades\Lang',
+        'Log'        => 'Illuminate\Support\Facades\Log',
+        'Mail'       => 'Illuminate\Support\Facades\Mail',
+        'Password'   => 'Illuminate\Support\Facades\Password',
+        'Queue'      => 'Illuminate\Support\Facades\Queue',
+        'Redirect'   => 'Illuminate\Support\Facades\Redirect',
+        'Redis'      => 'Illuminate\Support\Facades\Redis',
+        'Request'    => 'Illuminate\Support\Facades\Request',
+        'Response'   => 'Illuminate\Support\Facades\Response',
+        'Route'      => 'Illuminate\Support\Facades\Route',
+        'Schema'     => 'Illuminate\Support\Facades\Schema',
+        'Session'    => 'Illuminate\Support\Facades\Session',
+        'Storage'    => 'Illuminate\Support\Facades\Storage',
+        'URL'        => 'Illuminate\Support\Facades\URL',
+        'Validator'  => 'Illuminate\Support\Facades\Validator',
+        'View'       => 'Illuminate\Support\Facades\View',
+        'Form'       => 'Collective\Html\FormFacade',
+        'Html'       => 'Collective\Html\HtmlFacade',
+        'Uuid'       => 'Webpatser\Uuid\Uuid',
+        'Carbon'     => 'Carbon\Carbon',
+        'Zipper'     => 'Chumper\Zipper\Zipper',
 
     ],
 

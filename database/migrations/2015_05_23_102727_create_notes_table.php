@@ -1,11 +1,10 @@
 <?php
 
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
 
 class CreateNotesTable extends Migration
 {
-
     /**
      * Run the migrations.
      *
@@ -16,17 +15,18 @@ class CreateNotesTable extends Migration
         Schema::create(
             'notes',
             function (Blueprint $table) {
-
+                // Columns
                 $table->increments('id');
                 $table->integer('ticket_id')->unsigned();
-                $table->string('submitter');
+                $table->string('submitter', 80);
                 $table->longText('text');
-                $table->boolean('hidden')->unsigned();
-                $table->boolean('viewed')->unsigned();
+                $table->boolean('hidden')->default(false);
+                $table->boolean('viewed')->default(false);
                 $table->timestamps();
+                $table->softDeletes();
 
+                // Indexes
                 $table->index('ticket_id');
-
             }
         );
     }
